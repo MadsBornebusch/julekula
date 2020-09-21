@@ -1,0 +1,14 @@
+# Ignore header file with secret stuff
+secret.h
+
+# Ignore platforn io folder
+.pio
+
+# Ignore vscode folder
+.vscode
+
+# Ignore Python virtual environment
+venv
+
+# Ignore temporary build file created by PlatformIO
+*.ino.cpp
