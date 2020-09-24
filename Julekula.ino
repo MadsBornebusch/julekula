@@ -1,5 +1,6 @@
-#include <Wire.h>
+#include "Adafruit_BMP085_soft.h"
 #include <Adafruit_BMP085.h>
+
 
 #define LED_PIN 2
 
@@ -10,13 +11,17 @@
 // sda 11 scl 12
 
 Adafruit_BMP085 bmp0;
-Adafruit_BMP085 bmp1;
+Adafruit_BMP085_soft bmp1;
 int32_t p_zero0, p_zero1;
 
   
 void setup() {
   // Init serial
   Serial.begin(115200);
+
+  // Set LED pin to output and turn on LED
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
 
   // Init pressure sensor 0
   if (!bmp0.begin(SDA_0, SCL_0, BMP085_ULTRAHIGHRES))
@@ -49,8 +54,9 @@ void setup() {
   Serial.println(p_zero1);
   Serial.println("Calibration done!");
   
-  // Set LED pin to output
-  pinMode(LED_PIN, OUTPUT);
+  // Turn off LED
+  digitalWrite(LED_PIN, HIGH);
+
 
 
 }
@@ -75,6 +81,7 @@ void loop() {
     // Sensor 1 seems to give a diff on both readings while sensor 0 doesn't do anything..?
     // TODO: Maybe test sensor 0 by itself?
     // No, wire doesnt support two i2c buses: https://dronebotworkshop.com/multiple-i2c-bus/
+    // Or this one: https://playground.arduino.cc/Main/SoftwareI2CLibrary/
     Serial.print("Diff pressures: ");
     Serial.print(pressure0 - p_zero0);
     Serial.print(" , ");
