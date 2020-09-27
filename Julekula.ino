@@ -1,5 +1,5 @@
 #include "Adafruit_BMP085_soft.h"
-#include <Adafruit_BMP085.h>
+//#include <Adafruit_BMP085.h>
 
 
 #define LED_PIN 2
@@ -10,7 +10,7 @@
 #define SCL_1 12
 // sda 11 scl 12
 
-Adafruit_BMP085 bmp0;
+Adafruit_BMP085_soft bmp0;
 Adafruit_BMP085_soft bmp1;
 int32_t p_zero0, p_zero1;
 
