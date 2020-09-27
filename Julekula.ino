@@ -10,8 +10,8 @@
 #define SCL_1 12
 // sda 11 scl 12
 
-Adafruit_BMP085_soft bmp0;
-Adafruit_BMP085_soft bmp1;
+Adafruit_BMP085_soft bmp0(SDA_0, SCL_0);
+Adafruit_BMP085_soft bmp1(SDA_1, SCL_1);
 int32_t p_zero0, p_zero1;
 
 
@@ -24,14 +24,14 @@ void setup() {
   digitalWrite(LED_PIN, LOW);
 
   // Init pressure sensor 0
-  if (!bmp0.begin(SDA_0, SCL_0, BMP085_ULTRAHIGHRES))
-	  Serial.println("Could not find a valid BMP085 sensor, check wiring for sensor 0!");
+  if (!bmp0.begin(BMP085_ULTRAHIGHRES))
+    Serial.println("Could not find a valid BMP085 sensor, check wiring for sensor 0!");
   else
     Serial.println("BMP085 sensor 0 found!");
 
   // Init pressure sensor 1
-  if (!bmp1.begin(SDA_1, SCL_1, BMP085_ULTRAHIGHRES))
-	  Serial.println("Could not find a valid BMP085 sensor, check wiring for sensor 1!");
+  if (!bmp1.begin(BMP085_ULTRAHIGHRES))
+    Serial.println("Could not find a valid BMP085 sensor, check wiring for sensor 1!");
   else
     Serial.println("BMP085 sensor 1 found!");
 
