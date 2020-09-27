@@ -14,7 +14,7 @@ Adafruit_BMP085_soft bmp0;
 Adafruit_BMP085_soft bmp1;
 int32_t p_zero0, p_zero1;
 
-  
+
 void setup() {
   // Init serial
   Serial.begin(115200);
@@ -53,14 +53,14 @@ void setup() {
   Serial.print("Sensor 1 calibration value: ");
   Serial.println(p_zero1);
   Serial.println("Calibration done!");
-  
+
   // Turn off LED
   digitalWrite(LED_PIN, HIGH);
 
 
 
 }
-  
+
 void loop() {
     // TODO: do continuous calibration with a low pass filter with very long time constant
 
@@ -69,7 +69,7 @@ void loop() {
     // Serial.println(" *C");
     int32_t pressure0 = bmp0.readPressure();
     int32_t pressure1 = bmp1.readPressure();
-    
+
     Serial.print("Pressure 0 = ");
     Serial.print(pressure0);
     Serial.println(" Pa");
@@ -92,7 +92,7 @@ void loop() {
       digitalWrite(LED_PIN, LOW);
     else
       digitalWrite(LED_PIN, HIGH);
-    
+
     Serial.println();
     delay(500);
 }
