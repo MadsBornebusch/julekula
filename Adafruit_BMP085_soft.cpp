@@ -28,7 +28,6 @@
  */
 
 #include "Adafruit_BMP085_soft.h"
-SlowSoftI2CMaster* i2c;
 
 Adafruit_BMP085_soft::Adafruit_BMP085_soft() {}
 

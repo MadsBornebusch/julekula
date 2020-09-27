@@ -104,6 +104,7 @@ private:
   uint8_t read8(uint8_t addr);
   uint16_t read16(uint8_t addr);
   void write8(uint8_t addr, uint8_t data);
+  SlowSoftI2CMaster* i2c;
 
   uint8_t oversampling;
 
