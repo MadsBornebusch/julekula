@@ -31,7 +31,8 @@
 
 Adafruit_BMP085_soft::Adafruit_BMP085_soft() {}
 
-boolean Adafruit_BMP085_soft::begin(int sda, int scl, uint8_t mode) {
+boolean Adafruit_BMP085_soft::begin(int sda, int scl, uint8_t mode)
+{
   if (mode > BMP085_ULTRAHIGHRES)
     mode = BMP085_ULTRAHIGHRES;
   oversampling = mode;
@@ -87,13 +88,15 @@ boolean Adafruit_BMP085_soft::begin(int sda, int scl, uint8_t mode) {
   return true;
 }
 
-int32_t Adafruit_BMP085_soft::computeB5(int32_t UT) {
+int32_t Adafruit_BMP085_soft::computeB5(int32_t UT)
+{
   int32_t X1 = (UT - (int32_t)ac6) * ((int32_t)ac5) >> 15;
   int32_t X2 = ((int32_t)mc << 11) / (X1 + (int32_t)md);
   return X1 + X2;
 }
 
-uint16_t Adafruit_BMP085_soft::readRawTemperature(void) {
+uint16_t Adafruit_BMP085_soft::readRawTemperature(void)
+{
   write8(BMP085_CONTROL, BMP085_READTEMPCMD);
   delay(5);
 #if BMP085_DEBUG == 1
@@ -103,7 +106,8 @@ uint16_t Adafruit_BMP085_soft::readRawTemperature(void) {
   return read16(BMP085_TEMPDATA);
 }
 
-uint32_t Adafruit_BMP085_soft::readRawPressure(void) {
+uint32_t Adafruit_BMP085_soft::readRawPressure(void)
+{
   uint32_t raw;
 
   write8(BMP085_CONTROL, BMP085_READPRESSURECMD + (oversampling << 6));
@@ -138,7 +142,8 @@ uint32_t Adafruit_BMP085_soft::readRawPressure(void) {
   return raw;
 }
 
-int32_t Adafruit_BMP085_soft::readPressure(void) {
+int32_t Adafruit_BMP085_soft::readPressure(void)
+{
   int32_t UT, UP, B3, B5, B6, X1, X2, X3, p;
   uint32_t B4, B7;
 
@@ -208,9 +213,12 @@ int32_t Adafruit_BMP085_soft::readPressure(void) {
   Serial.println(B7);
 #endif
 
-  if (B7 < 0x80000000) {
+  if (B7 < 0x80000000)
+  {
     p = (B7 * 2) / B4;
-  } else {
+  }
+  else
+  {
     p = (B7 / B4) * 2;
   }
   X1 = (p >> 8) * (p >> 8);
@@ -234,12 +242,14 @@ int32_t Adafruit_BMP085_soft::readPressure(void) {
   return p;
 }
 
-int32_t Adafruit_BMP085_soft::readSealevelPressure(float altitude_meters) {
+int32_t Adafruit_BMP085_soft::readSealevelPressure(float altitude_meters)
+{
   float pressure = readPressure();
   return (int32_t)(pressure / pow(1.0 - altitude_meters / 44330, 5.255));
 }
 
-float Adafruit_BMP085_soft::readTemperature(void) {
+float Adafruit_BMP085_soft::readTemperature(void)
+{
   int32_t UT, B5; // following ds convention
   float temp;
 
@@ -261,7 +271,8 @@ float Adafruit_BMP085_soft::readTemperature(void) {
   return temp;
 }
 
-float Adafruit_BMP085_soft::readAltitude(float sealevelPressure) {
+float Adafruit_BMP085_soft::readAltitude(float sealevelPressure)
+{
   float altitude;
 
   float pressure = readPressure();
@@ -273,10 +284,11 @@ float Adafruit_BMP085_soft::readAltitude(float sealevelPressure) {
 
 /*********************************************************************/
 
-uint8_t Adafruit_BMP085_soft::read8(uint8_t a) {
+uint8_t Adafruit_BMP085_soft::read8(uint8_t a)
+{
   uint8_t ret;
 
-  i2c->i2c_start((BMP085_I2CADDR<<1)|I2C_WRITE); // start transmission to device
+  i2c->i2c_start((BMP085_I2CADDR << 1) | I2C_WRITE); // start transmission to device
 #if (ARDUINO >= 100)
   i2c->i2c_write(a); // sends register address to read from
 #else
@@ -284,7 +296,7 @@ uint8_t Adafruit_BMP085_soft::read8(uint8_t a) {
 #endif
   //i2c->i2c_stop(); // end transmission
 
-  i2c->i2c_rep_start((BMP085_I2CADDR<<1)|I2C_READ); // start transmission to device
+  i2c->i2c_rep_start((BMP085_I2CADDR << 1) | I2C_READ); // start transmission to device
   //i2c.requestFrom(BMP085_I2CADDR, 1);    // send data n-bytes read
 #if (ARDUINO >= 100)
   ret = i2c->i2c_read(true); // receive DATA
@@ -296,10 +308,11 @@ uint8_t Adafruit_BMP085_soft::read8(uint8_t a) {
   return ret;
 }
 
-uint16_t Adafruit_BMP085_soft::read16(uint8_t a) {
+uint16_t Adafruit_BMP085_soft::read16(uint8_t a)
+{
   uint16_t ret;
 
-  i2c->i2c_start((BMP085_I2CADDR<<1)|I2C_WRITE); // start transmission to device
+  i2c->i2c_start((BMP085_I2CADDR << 1) | I2C_WRITE); // start transmission to device
 #if (ARDUINO >= 100)
   i2c->i2c_write(a); // sends register address to read from
 #else
@@ -307,7 +320,7 @@ uint16_t Adafruit_BMP085_soft::read16(uint8_t a) {
 #endif
   //i2c->i2c_stop(); // end transmission
 
-  i2c->i2c_rep_start((BMP085_I2CADDR<<1)|I2C_READ); // start transmission to device
+  i2c->i2c_rep_start((BMP085_I2CADDR << 1) | I2C_READ); // start transmission to device
   //Wire.requestFrom(BMP085_I2CADDR, 2);    // send data n-bytes read
 #if (ARDUINO >= 100)
   ret = i2c->i2c_read(false); // receive DATA
@@ -323,8 +336,9 @@ uint16_t Adafruit_BMP085_soft::read16(uint8_t a) {
   return ret;
 }
 
-void Adafruit_BMP085_soft::write8(uint8_t a, uint8_t d) {
-  i2c->i2c_start((BMP085_I2CADDR<<1)|I2C_WRITE); // start transmission to device
+void Adafruit_BMP085_soft::write8(uint8_t a, uint8_t d)
+{
+  i2c->i2c_start((BMP085_I2CADDR << 1) | I2C_WRITE); // start transmission to device
 #if (ARDUINO >= 100)
   i2c->i2c_write(a); // sends register address to read from
   i2c->i2c_write(d); // write data
