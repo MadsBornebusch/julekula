@@ -1,16 +1,16 @@
 #include "Adafruit_BMP085_soft.h"
 #include <Adafruit_BMP085.h>
-#include <Adafruit_NeoPixel.h>
 #include <FastLED.h>
+#include "Fire2012.h"
 
 
 #define LED_PIN 2
 #define BUTTON_PIN 0
-#define PIXEL_PIN 16
+#define PIXEL_PIN 3
 #define NUM_LEDS 7
 #define COLOR_ORDER GRB
 #define CHIPSET WS2812B
-#define BRIGHTNESS 100
+#define BRIGHTNESS_MAX 100
 
 #define SDA_0 4
 #define SCL_0 5
@@ -18,7 +18,7 @@
 #define SCL_1 12
 // sda 11 scl 12
 #define SDA_2 14
-#define SCL_2 0
+#define SCL_2 16
 #define IMU_SDA 4
 #define IMU_SCL 5
 
@@ -34,15 +34,16 @@
 // TODO: MPU6050 motion interrupt: https://github.com/jarzebski/Arduino-MPU6050/blob/master/MPU6050_motion/MPU6050_motion.ino
 // https://courses.cs.washington.edu/courses/cse466/14au/labs/l4/MPU6050BasicExample.ino
 
-// TODO: Get the LED strip to work.. Connect 470 Ohm resistor to data line and capacitor to voltage
 
 Adafruit_BMP085 bmp0; //Adafruit_BMP085_soft bmp0(SDA_0, SCL_0);
 Adafruit_BMP085_soft bmp1(SDA_1, SCL_1);
 Adafruit_BMP085_soft bmp2(SDA_2, SCL_2);
 int32_t p_zero0, p_zero1, p_zero2;
 float var_zero0, var_zero1, var_zero2;
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
-CRGBArray<NUM_LEDS> leds;
+CRGB leds[NUM_LEDS];
+CRGBPalette16 gPal;
+int brightness = 0;
+
 
 float highPass(float in, float in_last, float out_last, float dt, float RC){
   float alpha = RC / (RC + dt);
@@ -113,23 +114,17 @@ void setup() {
   p_zero0 = (int32_t)pressure0;
   p_zero1 = (int32_t)pressure1;
   p_zero2 = (int32_t)pressure2;
-  // Serial.print("Sensor 0 calibration value: ");
-  // Serial.println(p_zero0);
-  // Serial.print("Sensor 1 calibration value: ");
-  // Serial.println(p_zero1);
   Serial.println("Calibration done!");
 
   // Turn off LED
   digitalWrite(LED_PIN, HIGH);
 
-  // Turn off LED strip
-  strip.begin();
-  strip.setBrightness(50);
-  strip.show(); // Initialize all pixels to 'off'
-
+  // Initialize LED strip and color palette
   FastLED.addLeds<CHIPSET, PIXEL_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness( BRIGHTNESS );
+  FastLED.setBrightness(brightness);
+  gPal = CRGBPalette16( CRGB::Black, CRGB::Red, CRGB::Yellow, CRGB::White);
 
+  // HEader for the arduino serial plotter
   Serial.println("P0_diff,P0_lim,P1_diff,P1_lim,P2_diff,P2_lim, button");
 
 }
@@ -177,50 +172,54 @@ void loop() {
     if(DETECT_THRES * sqrt(var_2) > out_2)
       lpf2_last = var_2;
 
-    // Serial.print(pressure0); 
-    // Serial.print(",");
-    // Serial.print(pressure0 - p_zero0); 
-    // Serial.print(",");
+    // Debug prints for plotting in the arduino serial plotter
     Serial.print(out_0);
     Serial.print(",");
     Serial.print(DETECT_THRES * sqrt(var_0));
-
-    // Serial.print(pressure1);
-    // Serial.print(",");
-    // Serial.print(pressure1 - p_zero1);
     Serial.print(",");
     Serial.print(out_1);
     Serial.print(",");
     Serial.print(DETECT_THRES * sqrt(var_1));
-
     Serial.print(",");
     Serial.print(out_2);
     Serial.print(",");
     Serial.print(DETECT_THRES * sqrt(var_2));
-
     Serial.print(",");
     Serial.print(!digitalRead(BUTTON_PIN));
     Serial.println();
-    
-    if(((DETECT_THRES * sqrt(var_0)) < out_0) || ((DETECT_THRES * sqrt(var_1)) < out_1) || ((DETECT_THRES * sqrt(var_2)) < out_2))
+
+    bool detection = (((DETECT_THRES * sqrt(var_0)) < out_0) || ((DETECT_THRES * sqrt(var_1)) < out_1) || ((DETECT_THRES * sqrt(var_2)) < out_2));
+
+    // TODO: remove this. Currently used for debug purposes
+    if(detection)
       digitalWrite(LED_PIN, LOW);
     else
       digitalWrite(LED_PIN, HIGH);
 
+    // LED animation
+    static bool bright_up = true;
+    if(detection || (brightness > 0))
+    {
+      random16_add_entropy( random(1000000));
+      FastLED.setBrightness( brightness );
+      // Control dimming up and down
+      if(brightness == BRIGHTNESS_MAX)
+        bright_up = false;
+      if (brightness == 0)
+        bright_up = true;
+      if(bright_up)
+        brightness++;
+      else
+        brightness--;
+      // Run fire simulation
+      FastLED.show(); // display this frame
+      Fire2012WithPalette(gPal, leds); // run simulation frame, using palette colors
+    }
+    else if (brightness == 0)
+      FastLED.clear(true);
+
     delay((long)(dt*1000.0));
 
-    // static uint8_t hue;
-    // for(int i = 0; i < NUM_LEDS/2; i++) {   
-    //   // fade everything out
-    //   leds.fadeToBlackBy(40);
-
-    //   // let's set an led value
-    //   leds[i] = CHSV(hue++,255,255);
-
-    //   // now, let's first 20 leds to the top 20 leds, 
-    //   leds(NUM_LEDS/2,NUM_LEDS-1) = leds(NUM_LEDS/2 - 1 ,0);
-    //   FastLED.delay(33);
-    // }
 }
 
-// TODO: Ream temperature as well? More data is always better I guess..
+// TODO: Read temperature as well? More data is always better I guess..
