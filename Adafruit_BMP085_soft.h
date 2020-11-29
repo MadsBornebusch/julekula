@@ -59,13 +59,13 @@
  */
 class Adafruit_BMP085_soft {
 public:
-  Adafruit_BMP085_soft();
+  Adafruit_BMP085_soft(int sda, int scl);
   /*!
    * @brief Starts I2C connection
    * @param mode Mode to set, ultra high-res by default
    * @return Returns true if successful
    */
-  boolean begin(int sda, int scl, uint8_t mode = BMP085_ULTRAHIGHRES);
+  boolean begin(uint8_t mode = BMP085_ULTRAHIGHRES);
   /*!
    * @brief Gets the temperature over I2C from the BMP085
    * @return Returns the temperature
@@ -104,6 +104,7 @@ private:
   uint8_t read8(uint8_t addr);
   uint16_t read16(uint8_t addr);
   void write8(uint8_t addr, uint8_t data);
+  SlowSoftI2CMaster i2c;
 
   uint8_t oversampling;
 
